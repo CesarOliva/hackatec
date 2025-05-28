@@ -1,15 +1,16 @@
-#IMPORTAR LIBRERIAS
+#Importar librerias
 import pandas as pd
 from collections import defaultdict
 
-excel = 'BDD.xlsx' # ARCHIVO QUE SUBA LA PERSONA
+excel = 'BDD.xlsx' #El archivo que elija la persona
 
-database = pd.read_excel(excel) # LEE EL EXCEL
+database = pd.read_excel(excel) #leer el excel
 
-def crear_arbol_jerarquico(df):
-    arbol = defaultdict(lambda: defaultdict(dict))
+#Crea el elemento del arbol
+def createTree(dataFrame):
+    arbol = defaultdict(lambda: defaultdict(dict)) # Diccionario. no existe la clave la crea
     
-    for _, fila in df.iterrows():
+    for _, fila in dataFrame.iterrows():
         niveles = []
         for valor in fila:
             if pd.notna(valor) and valor != '':
@@ -54,7 +55,7 @@ def navegar_arbol(arbol, nivel_actual=None):
         print("Opción no válida. Intenta de nuevo.")
         navegar_arbol(arbol, nivel_actual)
 
-arbol = crear_arbol_jerarquico(database)
+arbol = createTree(database)
 
 # Iniciar la navegación
 print("Navegación jerárquica - Comienza desde el primer nivel:")
