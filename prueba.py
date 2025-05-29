@@ -1,62 +1,55 @@
-#Importar librerias
+import customtkinter as CTk
+from tkinter import filedialog
 import pandas as pd
-from collections import defaultdict
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-excel = 'BDD.xlsx' #El archivo que elija la persona
+from PIL import Image
 
-database = pd.read_excel(excel) #leer el excel
+app = CTk.CTk()
+app.geometry("1000x600")
+app.iconbitmap('imagenes/zf.png')
 
-#Crea el elemento del arbol
-def createTree(dataFrame):
-    arbol = defaultdict(lambda: defaultdict(dict)) # Diccionario. no existe la clave la crea
-    
-    for _, fila in dataFrame.iterrows():
-        niveles = []
-        for valor in fila:
-            if pd.notna(valor) and valor != '':
-                niveles.append(valor)
-        
-        # Construir el árbol nivel por nivel
-        nivel_actual = arbol
-        for nivel in niveles:
-            if nivel not in nivel_actual:
-                nivel_actual[nivel] = defaultdict(dict)
-            nivel_actual = nivel_actual[nivel]
-    
-    return arbol
+CTk.CTkFrame(master=app, fg_color="#0057B7", width=300, height=600).place(relx=0, rely=0)
 
-def navegar_arbol(arbol, nivel_actual=None):
-    if nivel_actual is None:
-        nivel_actual = arbol
-    
-    opciones = list(nivel_actual.keys())
-    
-    if not opciones:
-        print("No hay más niveles disponibles.")
-        return
-    
-    print("\nOpciones disponibles:")
-    for i, opcion in enumerate(opciones, 1):
-        print(f"{i}. {opcion}")
-    
-    print("0. Volver al nivel anterior")
-    print("q. Salir")
-    
-    seleccion = input("\nSelecciona una opción: ")
-    
-    if seleccion == 'q':
-        return
-    elif seleccion == '0':
-        return  # Volverá al nivel anterior por recursión
-    elif seleccion.isdigit() and 1 <= int(seleccion) <= len(opciones):
-        opcion_seleccionada = opciones[int(seleccion)-1]
-        navegar_arbol(arbol, nivel_actual[opcion_seleccionada])
-    else:
-        print("Opción no válida. Intenta de nuevo.")
-        navegar_arbol(arbol, nivel_actual)
+def selectArchive():
+    excel = filedialog.askopenfilename(filetypes=(("Archivos de Excel", "*.xlsx"),))
+    if(excel):
+        mostrarElementos()
 
-arbol = createTree(database)
+label = CTk.CTkButton(master=app, text = "CarbonTracker", font=("Verdana",26), hover=False, fg_color="transparent", text_color="black")
+label.place(x=545, y=20)
 
-# Iniciar la navegación
-print("Navegación jerárquica - Comienza desde el primer nivel:")
-navegar_arbol(arbol)
+button = CTk.CTkButton(master=app, text="Importar archivo .xlsx", fg_color="#00abe7", font=('Verdana', 16) ,command=selectArchive)
+button.place(x=550, y=70)
+
+logo = CTk.CTkImage(light_image=Image.open('imagenes/zf.png'), size=(200,200))
+labelImg = CTk.CTkLabel(app, text="", image=logo, fg_color="#0057B7").place(x=50, y=30)
+
+def mostrarElementos():
+    sectores = ["Transporte", "Industria", "Energía", "Agricultura", "Residencial"]
+    emisiones = [25, 30, 20, 15, 10]
+    colores = ["#FF9999", "#66B3FF", "#99FF99", "#FFCC99", "#c2c2f0"]
+
+    # Crear la figura de Matplotlib
+    fig, ax = plt.subplots(figsize=(6, 4), subplot_kw=dict(aspect="equal"))
+    ax.pie(
+        emisiones,
+        labels=sectores,
+        colors=colores,
+        autopct='%1.1f%%',
+        startangle=90,
+        shadow=True,
+        explode=(0.1, 0, 0, 0, 0),  # Destacar el primer sector
+    )
+    ax.set_title("Distribución de Emisiones de CO2 por Sector")
+
+    # Integrar el gráfico en customtkinter
+    frame_grafico = CTk.CTkFrame(master=app, fg_color='transparent', width=200, height=200).place(x=500,y=200)
+
+    # Convertir la figura de Matplotlib a un widget de Tkinter
+    canvas = FigureCanvasTkAgg(fig, master=frame_grafico)
+    canvas.draw()
+    canvas.get_tk_widget().place(x=0, y=0, relwidth=1, relheight=1)  # Ocupa todo el frame
+
+app.mainloop()
