@@ -8,6 +8,8 @@ import matplotlib.backends.backend_pdf as pdf
 from fpdf import FPDF
 import PyPDF2
 import os
+import programa
+import webbrowser
 
 app = CTk.CTk(fg_color='white')
 app.geometry("1000x600")
@@ -18,7 +20,9 @@ CTk.CTkFrame(master=app, fg_color="#0057B7", width=300, height=600).place(relx=0
 def selectArchive():
     excel = filedialog.askopenfilename(filetypes=(("Archivos de Excel", "*.xlsx"),))
     if(excel):
+        datos = pd.read_excel(excel, header=None)
         mostrarElementos()
+        programa.logica(datos)
 
 label = CTk.CTkButton(master=app, text="CarbonTracker", font=("Verdana", 26), hover=False, fg_color="transparent", text_color="black")
 label.place(x=545, y=20)
@@ -38,9 +42,9 @@ def mostrarElementos():
 
 def GenerarPieChart():
     global output_file
-    colores = ["#FF9999", "#66B3FF", "#99FF99", "#FFCC99", "#c2c2f0"]
-    sectores = ["Transporte", "Industria", "Energía", "Agricultura", "Residencial"]
-    emisiones = [25, 30, 20, 15, 10]
+    colores = ["#031795", "#4618CE", "#7D89F2", "#8E9CFA", "#b8d6f5"]
+    sectores = ["Component E", "Component F", "Component H", "Component B", "Component C"]
+    emisiones = [20, 20, 20, 20, 20]
     
     datos_ordenados = sorted(zip(emisiones, sectores), reverse=False)
     emisiones_ordenadas = [dato[0] for dato in datos_ordenados]
@@ -92,10 +96,9 @@ def GenerarPieChart():
 
 def abrirPDF():
     try:
-        with open(output_file, 'rb') as pdf_file:
-            pdf_reader = PyPDF2.PdfReader(pdf_file)
-    except FileNotFoundError:
-        print(f"El archivo '{output_file}' no se encontró.")
+        ruta_absoluta = os.path.abspath(output_file)
+        webbrowser.open_new(f"file://{ruta_absoluta}")
+        print(f"El archivo '{output_file}'se encontró.")
         exit()
     except Exception as e:
         print(f"Ocurrió un error al abrir el archivo: {e}")
